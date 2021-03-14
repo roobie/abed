@@ -8,11 +8,19 @@ function isSpace(v: string): boolean {
 }
 
 function isParenOpen(v: string): boolean {
-  return v === "(" || v === "[";
+  return v === "(";
 }
 
 function isParenClose(v: string): boolean {
-  return v === ")" || v === "]";
+  return v === ")";
+}
+
+function isParenOpenData(v: string): boolean {
+  return v === "[";
+}
+
+function isParenCloseData(v: string): boolean {
+  return v === "]";
 }
 
 function isStringDelimiter(v: string): boolean {
@@ -120,6 +128,14 @@ export class Reader {
         throw new Error(this.getErrorMessage("Unbalanced form."));
       }
       return [Token.PAREN_CLOSE, ")"];
+      // --
+    } else if (isParenOpenData(this.current)) {
+      this.advance();
+      return [Token.PAREN_OPEN_DATA, "["];
+      // --
+    } else if (isParenCloseData(this.current)) {
+      this.advance();
+      return [Token.PAREN_CLOSE_DATA, "]"];
       // --
     } else if (isStringDelimiter(this.current)) {
       this.advance();

@@ -15,8 +15,10 @@ export interface AbedASTNode {
 export class ListNode implements AbedASTNode {
   nodeType: NodeType = NodeType.LIST;
   contents: AbedASTNode[];
-  constructor(contents: AbedASTNode[]) {
+  meta?: { maybeData?: boolean };
+  constructor(contents: AbedASTNode[], meta?: { maybeData?: boolean }) {
     this.contents = contents;
+    this.meta = meta;
   }
 
   toJSON() {
@@ -112,6 +114,8 @@ function parseToken(
         return [position + 1, new NumberNode(parseFloat(token))];
       case Token.PAREN_OPEN:
         return parseList(tokens, position + 1);
+      case Token.PAREN_OPEN_DATA:
+        return parseDataList(tokens, position + 1);
       default:
         throw new Error(`Fallthrough! ${position} ${tokenType} ${token}`);
     }
@@ -127,6 +131,26 @@ function parseList(
     const tok = tokens[position];
     if (
       tok == null || (tok[0] === Token.PAREN_CLOSE)
+    ) {
+      return [position + 1, listNode];
+    }
+
+    const [newPosition, node] = parseToken(tokens, position);
+    listNode.contents.push(node);
+    position = newPosition;
+  }
+}
+
+function parseDataList(
+  tokens: TokenPair[],
+  position: number,
+): [number, AbedASTNode] {
+  // const listNode = new ListNode([new SymbolNode("quote")]);
+  const listNode = new ListNode([], { maybeData: true });
+  for (;;) {
+    const tok = tokens[position];
+    if (
+      tok == null || (tok[0] === Token.PAREN_CLOSE_DATA)
     ) {
       return [position + 1, listNode];
     }

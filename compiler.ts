@@ -61,6 +61,12 @@ function compileNode(
         return `[${forms.join(", ")}]`;
       } else {
         if (
+          first.nodeType !== NodeType.SYMBOL &&
+          node.meta?.maybeData === true
+        ) {
+          return compileNode(node, { quoted: true });
+        }
+        if (
           first.nodeType === NodeType.SYMBOL &&
           (first as SymbolNode).value === "fn"
         ) {
@@ -76,9 +82,6 @@ function compileNode(
           return `function (${parameters.join(", ")}) {${forms.join(";")}}`;
         } else {
           const fn = compileNode(first, mode);
-          if (fn.includes("doctype")) {
-            console.log("asdf", JSON.stringify(node, null, 2));
-          }
           if (node.contents.length > 1) {
             const args = node.contents.slice(1).map((v) =>
               compileNode(v, mode)
