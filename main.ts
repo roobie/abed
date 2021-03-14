@@ -27,7 +27,7 @@ const tokens = reader.tokenize();
 console.log(tokens);
 
 {
-  const tokens = new Reader(`(quote 1 2 "hello" (quote (a b c)))`).tokenize();
+  // const tokens = new Reader(`(quote () 1 2 "hello" (list a b c))`).tokenize();
   const ast = parse(tokens);
 
   console.log(JSON.stringify(ast, null, 2));
@@ -35,4 +35,6 @@ console.log(tokens);
   const program = compile(ast);
   const result = program({});
   console.log(result);
+
+  Deno.writeTextFileSync("out.js", result);
 }

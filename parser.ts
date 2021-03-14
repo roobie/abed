@@ -29,6 +29,7 @@ export class StringNode implements AbedASTNode {
   constructor(value: string) {
     this.value = value;
   }
+
   toJSON() {
     return this.value;
   }
@@ -39,6 +40,7 @@ export class SymbolNode implements AbedASTNode {
   constructor(value: string) {
     this.value = value;
   }
+
   toJSON() {
     return "symbol:" + this.value;
   }
@@ -49,6 +51,7 @@ export class KeywordNode implements AbedASTNode {
   constructor(value: string) {
     this.value = value;
   }
+
   toJSON() {
     return "keyword:" + this.value;
   }
@@ -59,6 +62,7 @@ export class NumberNode implements AbedASTNode {
   constructor(value: number) {
     this.value = value;
   }
+
   toJSON() {
     return this.value;
   }
@@ -66,20 +70,28 @@ export class NumberNode implements AbedASTNode {
 
 export function parse(tokens: TokenPair[]): AbedASTNode {
   const root = new ListNode([]);
-  return parseTokens(root, tokens, 0);
+  return parseTokens(tokens, 0, root);
 }
 
 function parseTokens(
-  root: ListNode,
   tokens: TokenPair[],
   position: number,
+  root?: ListNode,
 ): AbedASTNode {
   const [newPosition, node] = parseToken(tokens, position);
-  root.contents.push(node);
+  if (root == null) { // FIXME: bugs out when multiple top-level forms
+    if (node.nodeType === NodeType.LIST) {
+      root = node as ListNode;
+    } else {
+      root = new ListNode([node]);
+    }
+  } else {
+    root.contents.push(node);
+  }
   if (newPosition >= tokens.length) {
     return root;
   } else {
-    return parseTokens(root, tokens, newPosition);
+    return parseTokens(tokens, newPosition, root);
   }
 }
 
